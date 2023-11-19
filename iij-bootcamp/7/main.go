@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/Seiya-Tagami/go-practice/iij-bootcamp/7/shop"
 	"net/http"
+
+	"github.com/Seiya-Tagami/go-basics/iij-bootcamp/7/shop"
 )
 
 func main() {

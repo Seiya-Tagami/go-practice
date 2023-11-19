@@ -1,1 +1,1 @@
-# go-practice
+# go-basics

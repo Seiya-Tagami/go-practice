@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/Seiya-Tagami/go-practice/iij-bootcamp/1-5/monkey"
+	"github.com/Seiya-Tagami/go-basics/iij-bootcamp/1-5/monkey"
 	"os"
 )
 
