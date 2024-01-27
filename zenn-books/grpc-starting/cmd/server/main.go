@@ -5,13 +5,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"time"
 
+	"mygrpc/cmd/server/interceptor"
 	hellopb "mygrpc/pkg/grpc"
 
 	"google.golang.org/grpc"
@@ -41,6 +44,41 @@ func (s *myServer) HelloServerStream(req *hellopb.HelloRequest, stream hellopb.G
 	return nil
 }
 
+func (s *myServer) HelloClientStream(stream hellopb.GreetingService_HelloClientStreamServer) error {
+	nameList := make([]string, 0)
+	for {
+		req, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			message := fmt.Sprintf("Hello, %v!", nameList)
+			return stream.SendAndClose(&hellopb.HelloResponse{
+				Message: message,
+			})
+		}
+		if err != nil {
+			return err
+		}
+		nameList = append(nameList, req.GetName())
+	}
+}
+
+func (s *myServer) HelloBiStreams(stream hellopb.GreetingService_HelloBiStreamsServer) error {
+	for {
+		req, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		message := fmt.Sprintf("Hello, %v!", req.GetName())
+		if err := stream.Send(&hellopb.HelloResponse{
+			Message: message,
+		}); err != nil {
+			return err
+		}
+	}
+}
+
 func NewMyServer() *myServer {
 	return &myServer{}
 }
@@ -53,7 +91,7 @@ func main() {
 	}
 
 	s := grpc.NewServer(
-	// grpc.UnaryInterceptor(myUnaryServerInterceptor1),
+		grpc.UnaryInterceptor(interceptor.MyUnaryServerInterceptor1),
 	)
 
 	hellopb.RegisterGreetingServiceServer(s, NewMyServer())
