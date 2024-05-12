@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  db:
+    container_name: db
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: gwp
+      POSTGRES_PASSWORD: gwp
+      POSTGRES_DB: gwp
+    volumes:
+      - db-store:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  db-store:
