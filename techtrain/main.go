@@ -11,7 +11,12 @@ import (
 )
 
 func main() {
-	err := realMain()
+	err := setupEnv()
+	if err != nil {
+		log.Fatalln("main: failed to set up environment variables, err =", err)
+	}
+
+	err = realMain()
 	if err != nil {
 		log.Fatalln("main: failed to exit successfully, err =", err)
 	}
@@ -54,5 +59,17 @@ func realMain() error {
 	// TODO: implement graceful shutdown
 	http.ListenAndServe(defaultPort, mux)
 
+	return nil
+}
+
+func setupEnv() error {
+	err := os.Setenv("BASIC_AUTH_USER_ID", "user")
+	if err != nil {
+		return err
+	}
+	err = os.Setenv("BASIC_AUTH_PASSWORD", "password")
+	if err != nil {
+		return err
+	}
 	return nil
 }

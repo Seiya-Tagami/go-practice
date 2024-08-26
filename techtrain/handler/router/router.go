@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"techtrain-go-practice/handler"
-	"techtrain-go-practice/middleware"
-	"techtrain-go-practice/middleware/utils"
+	"techtrain-go-practice/handler/middleware"
+	"techtrain-go-practice/handler/middleware/utils"
 	"techtrain-go-practice/service"
 )
 
@@ -20,6 +20,7 @@ func NewRouter(todoDB *sql.DB) *http.ServeMux {
 		middleware.Recovery,
 		middleware.SetOS,
 		middleware.Logger,
+		middleware.BasicAuth,
 	))
 	mux.Handle("/do-panic", utils.ChainMiddlewares(
 		handler.NewPanicHandler(),
@@ -32,6 +33,7 @@ func NewRouter(todoDB *sql.DB) *http.ServeMux {
 		middleware.Recovery,
 		middleware.SetOS,
 		middleware.Logger,
+		middleware.BasicAuth,
 	))
 
 	return mux
