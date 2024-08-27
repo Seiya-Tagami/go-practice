@@ -59,6 +59,9 @@ func RunApp() {
 		WriteTimeout:      10 * time.Minute,
 	}
 
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer cancel()
+
 	var wg sync.WaitGroup
 
 	log.Printf("Starting server on localhost%s...\n", port)
@@ -66,9 +69,7 @@ func RunApp() {
 		log.Print(err)
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
-	defer cancel()
-
+	// graceful shutdown
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
