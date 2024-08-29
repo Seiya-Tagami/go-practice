@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
@@ -62,26 +61,22 @@ func RunApp() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer cancel()
 
-	var wg sync.WaitGroup
-
-	log.Printf("Starting server on localhost%s...\n", port)
-	if err := srv.ListenAndServe(); err != nil {
-		log.Print(err)
-	}
-
-	// graceful shutdown
-	wg.Add(1)
 	go func() {
-		defer wg.Done()
-
-		<-ctx.Done()
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		srv.Shutdown(ctx)
+		log.Printf("Starting server on localhost%s...\n", port)
+		if err := srv.ListenAndServe(); err != nil {
+			log.Print(err)
+		}
 	}()
 
-	wg.Wait()
+	// graceful shutdown
+	<-ctx.Done()
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Println("Failed to gracefully shutdown:", err)
+	}
+	log.Println("Server shutdown")
 }
 
 func setupEnv() error {
